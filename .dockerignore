@@ -1,0 +1,21 @@
+node_modules
+.next
+.git
+.worktrees
+.superpowers
+docs
+scripts
+*.log
+
+# Local secrets and data — never bake these into the image
+.env
+.env.local
+prisma/dev.db
+prisma/dev.db-journal
+public/uploads/*
+!public/uploads/.gitkeep
+
+# Editor/OS cruft
+.vscode
+.DS_Store
+Thumbs.db

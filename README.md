@@ -67,6 +67,50 @@ O servidor de desenvolvimento recarrega automaticamente ao editar qualquer arqui
 4. **Jogue**: na tela do jogo, selecione o "time da vez", clique nos blocos da grade para revelar perguntas ou efeitos especiais, e ajuste a pontuação manualmente conforme os times respondem.
 5. **Encerre o jogo** quando terminar — o resultado final fica salvo no histórico do painel.
 
+## Rodando com Docker
+
+Se preferir não instalar Node.js na máquina, dá para rodar tudo containerizado com Docker.
+
+**Pré-requisito:** [Docker](https://www.docker.com/) instalado e rodando (Docker Desktop no Windows/Mac, ou Docker Engine no Linux).
+
+1. Crie o `.env` a partir do exemplo, se ainda não tiver:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Edite o `.env` e defina um `JWT_SECRET` forte — o `docker-compose.yml` lê essa variável do `.env` automaticamente.
+
+2. Suba o container:
+
+   ```bash
+   docker compose up --build
+   ```
+
+   Na primeira vez, isso builda a imagem (instala dependências, compila o Next.js) e sobe o container. As migrations do Prisma são aplicadas automaticamente antes do servidor iniciar.
+
+3. Acesse **http://localhost:3000**.
+
+O banco de dados (`prisma/dev.db`) e os arquivos enviados por upload (`public/uploads/`) ficam salvos em **volumes Docker nomeados** (`quiz-db` e `quiz-uploads`), então persistem entre reinícios do container — só são apagados se você rodar `docker compose down -v`.
+
+Para rodar em segundo plano:
+
+```bash
+docker compose up -d --build
+```
+
+Para parar:
+
+```bash
+docker compose down
+```
+
+Para ver os logs:
+
+```bash
+docker compose logs -f
+```
+
 ## Rodando os testes
 
 ```bash
