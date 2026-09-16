@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  themes Theme[]
+  games  Game[]
+}
+
+model Theme {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id])
+  createdAt DateTime @default(now())
+
+  questions Question[]
+  games     Game[]
+
+  @@index([ownerId])
+}
+
+enum MediaType {
+  none
+  image
+  gif
+  video
+}
+
+enum MediaSource {
+  upload
+  url
+}
+
+model Question {
+  id          String      @id @default(cuid())
+  themeId     String
+  theme       Theme       @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  prompt      String
+  answer      String
+  mediaType   MediaType   @default(none)
+  mediaSource MediaSource?
+  mediaValue  String?
+  createdAt   DateTime    @default(now())
+
+  gameBlocks GameBlock[]
+
+  @@index([themeId])
+}
+
+enum GameStatus {
+  draft
+  in_progress
+  finished
+}
+
+model Game {
+  id                  String     @id @default(cuid())
+  title               String
+  ownerId             String
+  owner               User       @relation(fields: [ownerId], references: [id])
+  themeId             String
+  theme               Theme      @relation(fields: [themeId], references: [id])
+  questionCount       Int
+  specialBlockPercent Int        @default(0)
+  status              GameStatus @default(draft)
+  createdAt           DateTime   @default(now())
+  finishedAt          DateTime?
+
+  blocks GameBlock[]
+  teams  Team[]
+
+  @@index([ownerId])
+  @@index([themeId])
+}
+
+enum BlockType {
+  question
+  bonus_points
+  lose_points
+  skip_turn
+}
+
+model GameBlock {
+  id          String    @id @default(cuid())
+  gameId      String
+  game        Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  position    Int
+  type        BlockType
+  questionId  String?
+  question    Question? @relation(fields: [questionId], references: [id])
+  pointsValue Int?
+  revealed    Boolean   @default(false)
+
+  @@index([gameId])
+}
+
+model Team {
+  id     String @id @default(cuid())
+  gameId String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  name   String
+  color  String
+  score  Int    @default(0)
+
+  @@index([gameId])
+}
